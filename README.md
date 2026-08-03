@@ -105,7 +105,7 @@ For the DiArMaqAr archive, please also cite:
 
 ```bibtex
 @inproceedings{allami2026diarmaqar,
-  author    = {Allami, Khyam and El Asal, Mohammad and El Khansa, Lina and Bakarji, Joseph},
+  author    = {Allami, Khyam and Elkhansa, Ibrahim and El Asal, Mohammad and Bakarji, Joseph},
   title     = {Culture-Specific Computational Musicology: A Case Study of {DiArMaqAr} (Digital {A}rabic Maqam Archive)},
   booktitle = {Proc. of the Int. Society for Music Information Retrieval Conf.},
   year      = {2026}
