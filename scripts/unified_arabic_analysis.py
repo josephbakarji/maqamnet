@@ -19,6 +19,7 @@ import torch.nn as nn
 import warnings
 from pathlib import Path
 from collections import Counter, defaultdict
+import os
 from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import StratifiedKFold, StratifiedGroupKFold
 from sklearn.cluster import KMeans
@@ -100,6 +101,13 @@ MAQAM_COLORS = {
 # ============================================================
 
 # Precompute DiArMaqAr scale templates for tonic estimation
+# Template construction (see README, "Known issue: template construction"). The paper's code resolves note
+# names through the tuning system's one-octave list, which drops names from other octaves (e.g. husayni, awj,
+# kurdan), so maqam templates keep 3 to 6 of their 7 degrees. Set MAQAMNET_FIXED_TEMPLATES=1 to resolve every
+# note across octaves (scripts/fixed_templates.py). The default reproduces the published numbers.
+FIXED_TEMPLATES = os.environ.get("MAQAMNET_FIXED_TEMPLATES") == "1"
+
+
 def _build_tonic_templates():
     """Build maqam scale templates from DiArMaqAr for tonic estimation."""
     from scipy.ndimage import gaussian_filter1d as gf1d
@@ -135,6 +143,13 @@ def _build_tonic_templates():
                               for n in asc if n in note_to_cents))
         if degrees:
             maqam_scales[name] = degrees
+    if FIXED_TEMPLATES:
+        import fixed_templates as _ft
+        for name in list(maqam_scales):
+            try:
+                maqam_scales[name] = _ft.degrees("maqam", name)
+            except KeyError:
+                pass
 
     our_to_dia = {
         "bayat": "bayyat", "hijaz": "hijaz", "kurd": "kurd",
@@ -626,6 +641,9 @@ def load_diarmaqar():
                 degrees.append((note_to_cents[note] - tonic_cents) % 1200)
         if degrees:
             jins_templates[name] = sorted(set(degrees))
+    if FIXED_TEMPLATES:
+        import fixed_templates as _ft
+        jins_templates = {name: _ft.degrees("jins", name) for name in jins_templates}
 
     # Build suyur descriptions
     suyur = {}

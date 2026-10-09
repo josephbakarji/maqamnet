@@ -45,6 +45,31 @@ from the recordings listed in `data/arabic_oud/metadata.csv` (the provided
 oud histograms are the distribution-level inputs the features are built
 from). All scripts use identical stratified 5-fold splits (fixed seed).
 
+## Known issue: template construction (October 2026)
+
+The maqam and jins templates in the paper were built by looking note names up in the
+tuning system's one-octave list (`noteNames[0]` of Ronzevalle 1904). Note names from other
+octaves (for example ḥusaynī, awj, kurdān, ʿajam, muḥayyar) are not in that list and were
+skipped without a warning. As a result, the maqam templates keep 3 to 6 of their 7 degrees
+(five of the eight coincide with their lower jins), and 7 of the 28 jins templates lose notes.
+
+`scripts/fixed_templates.py` resolves every note name across octaves with DiArMaqAr's own
+note-name tables (vendored as `data/diarmaqar/data/noteNameOctaves.json`) and raises an error
+for names it cannot resolve. Run `python scripts/fixed_templates.py` to print the corrected
+degrees. To rebuild all features with the corrected templates, set
+
+```bash
+export MAQAMNET_FIXED_TEMPLATES=1
+```
+
+before running any script. Without the variable, the scripts reproduce the published numbers.
+
+What changes: template matching without learning rises from about 38% to 48%; tonic estimation
+with the maqam label falls from 75% to 64% within 50 cents (the truncated templates are close to
+the lower jins, which helps locate the tonic); MaqamNet with 36 corrected templates scores 79.6%
+under the validation-based protocol (single run) against 81.7% with the original templates. The
+accuracy conclusions of the paper do not change; the reading of individual template channels does.
+
 ## Reproducing the paper
 
 | Paper result | Command | Runtime |
